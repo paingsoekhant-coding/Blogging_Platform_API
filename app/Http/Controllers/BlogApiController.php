@@ -72,8 +72,15 @@ class BlogApiController extends Controller
     //filter blog
     public function filter_blog(Request $request)
     {
-        $da = $request;
-        return response()->json($da['tags']);
+
+        $query = Blog::query();
+        if ($request->filled('tags')) {
+            $query->where('tags', 'like', '%' . $request->input('tags') . '%');
+        }
+        $blogs = $query->get();
+
+
+        return response()->json($blogs);
     }
 
     private function getBlogData(Request $request)
