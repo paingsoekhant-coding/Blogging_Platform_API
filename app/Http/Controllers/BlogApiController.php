@@ -17,7 +17,7 @@ class BlogApiController extends Controller
             $data = [
                 "error message" => $validator->messages()
             ];
-            return response()->json($data);
+            return response()->json($data, 400);
         }
 
         $blog_data = $this->getBlogData($request);
@@ -25,6 +25,55 @@ class BlogApiController extends Controller
         Blog::create($blog_data);
         $response_message = "Blog Created Successfully";
         return response()->json(['status' => 201, 'message' => $response_message], 201);
+    }
+
+    //update blog api
+    public function update_blog(Request $request, $id)
+    {
+        $blogId = $request->id;
+        $item = Blog::where('id', $blogId)->first();
+
+        if (isset($item)) {
+            $newData = $this->getBlogData($request);
+            $result = Blog::where('id', $blogId)->Update($newData);
+            return response()->json(['status' => true, 'message' => "Update Success", 'Update Data' => $result], 200);
+        }
+        return response()->json(['status' => false, 'message' => "No Category Found"], 404);
+    }
+
+    //delete blog api
+    public function delete_blog($id)
+    {
+        $blogId = Blog::where('id', $id)->exists();
+        if (!$blogId) {
+            return response()->json(['error' => 'Blog not found'], 404);
+        }
+        Blog::where('id', $id)->delete();
+        return response()->json('Blog deleted successfully', 200);
+    }
+
+    // get single blog
+    public function get_blog($id)
+    {
+        $blog = Blog::where('id', $id)->first();
+        if (empty($blog)) {
+            return response()->json("No Data Found", 404);
+        }
+        return response()->json($blog);
+    }
+
+    //get all blog
+    public function read()
+    {
+        $all_blogData = Blog::all();
+        return response()->json($all_blogData);
+    }
+
+    //filter blog
+    public function filter_blog(Request $request)
+    {
+        $da = $request;
+        return response()->json($da['tags']);
     }
 
     private function getBlogData(Request $request)
